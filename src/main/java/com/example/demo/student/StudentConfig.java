@@ -10,6 +10,8 @@ import java.util.List;
 @Configuration
 public class StudentConfig {
 
+
+    //Sets up entries in database
     @Bean
     CommandLineRunner commandLineRunner(StudentRepository repository) {
         return args -> {

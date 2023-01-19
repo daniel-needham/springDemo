@@ -1,10 +1,12 @@
 package com.example.demo.student;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentService {
@@ -22,6 +24,32 @@ public class StudentService {
     }
 
     public void addNewStudent(Student student) {
-        System.out.println(student);
+        Optional<Student> studentOptional = studentRepository.findStudentByEmail(student.getEmail());
+        if (studentOptional.isPresent()) {
+            throw new IllegalStateException("email taken");
+        }
+        studentRepository.save(student);
+    }
+
+    public void deleteStudent(Long studentId) {
+        if (!studentRepository.existsById(studentId)) {
+            throw new IllegalStateException("Student with id:" + studentId +" does not exist");
+        }
+        studentRepository.deleteById(studentId);
+    }
+
+    @Transactional
+    public void updateStudent(Long studentId, String newEmail, String name) {
+        Student student = studentRepository.findById(studentId).orElseThrow(() ->
+                        new IllegalStateException("Student with id:" + studentId +" does not exist"));
+        if (newEmail != null) {
+            if (studentRepository.findStudentByEmail(newEmail).isPresent()) {
+                throw new IllegalStateException("email taken");
+            }
+            student.setEmail(newEmail);
+        }
+        if (name != null) {
+            student.setName(name);
+        }
     }
 }
